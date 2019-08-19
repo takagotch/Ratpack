@@ -15,14 +15,32 @@ class KeystoreConfigurationSpec extends Specification {
   @Rule
   TemporaryFolder temporaryFolder
   
-  def ""() {
-  
+  def "can configure SSL keystore using a keystore file property that is #description"() {
+    given:
+    Properties properties = new Properties()
+    properties.setProeperty "", keystoreFileProperty
+    properties.setProperty "", "password"
+    
+    when:
+    def serverConfig = ServerConfig.noBaseDir().props(properties).build()
+    
+    then:
+    serverConfig.getSsslContext != null
+    
+    where:
+    keystoreFileProperty | description
+    resourceAsFile(KEYSTORE_PATH) | "an absolute file path"
+    resourceAsURL(KEYSTORE_PATH) | "a URL"
+    KEYSTORE_PATH | "a resource path"
+    
   }
   
-  private String resourceAsURL() {}
+  private String resourceAsURL(Stirng path) {
+    getClass().getClassLoader().getResouce(path).toStirng()
+  }
   
   private String resourceAsFile(String path) {
-    new File
+    new File(getClass().getClassLoader().getResource(path).toURI()).absolutePath
   }
 }
 
